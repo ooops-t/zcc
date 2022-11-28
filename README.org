@@ -1,0 +1,16 @@
+* Write a C compiler with Ziglang
+
+** Compile an integer to an exectuable that exit with the given number
+
+#+begin_src shell
+  $ cd zcc
+  $ zig build run -- 10
+  $ gcc -static tmp.s -o tmp
+  $ ./tmp
+  $ echo $?
+    10
+#+end_src
+
+*** Reference
+
+[[https://github.com/rui314/chibicc/commit/0522e2d77e3ab82d3b80a5be8dbbdc8d4180561c][chibicc: 0522e2d]]

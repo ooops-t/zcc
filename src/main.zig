@@ -1,24 +1,32 @@
 const std = @import("std");
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    const allocator = arena.allocator();
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    // Get system args
+    const args = try std.process.argsAlloc(allocator);
+    if (args.len != 2) {
+        std.debug.print("Invalid number of arguments\n", .{});
+        std.debug.print("Usage: ./zcc <number>\n", .{});
+        return;
+    }
+    defer std.process.argsFree(allocator, args);
 
-    try bw.flush(); // don't forget to flush!
-}
+    // Covert string to usize
+    const number = try std.fmt.parseInt(usize, args[1], 10);
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+    // Create tmp assemably file
+    const tmpfs = std.fs.cwd().createFile("tmp.s", .{ .truncate = true }) catch |err| {
+        std.debug.panic("Create tmp assemably file failed: {s}\n", .{@errorName(err)});
+    };
+    defer tmpfs.close();
+
+    // Write assemably file
+    tmpfs.writer().print("  .global main\n", .{}) catch unreachable;
+    tmpfs.writer().print("main:\n", .{}) catch unreachable;
+    tmpfs.writer().print("  mov ${d}, %rax\n", .{number}) catch unreachable;
+    tmpfs.writer().print("  ret\n", .{}) catch unreachable;
 }
