@@ -14,3 +14,18 @@
 *** Reference
 
 [[https://github.com/rui314/chibicc/commit/0522e2d77e3ab82d3b80a5be8dbbdc8d4180561c][chibicc: 0522e2d]]
+
+** Add + and - operators
+
+#+begin_src shell
+    $ cd zcc
+    $ zig build run -- 5+20-4
+    $ gcc -static tmp.s -p tmp
+    $ ./tmp
+    $ echo $?
+      21
+#+end_src
+
+*** Reference
+
+[[https://github.com/rui314/chibicc/commit/bf7081fba7d8c6b1cd8a12eb329697a5481c604e][chibicc: bf7081f]]
